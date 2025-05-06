@@ -1,10 +1,43 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Keyboard, Pressable } from 'react-native';
 import { hp, wp } from './utils';
 
 const App = () => {
   //tab states
   const [tab, setTab] = useState<'Solar' | 'Bank'>('Solar')
+
+  // Bank EMI Calculator States
+  const [projectCost, setProjectCost] = useState('');
+  const [downPayment, setDownPayment] = useState('');
+  const [interestRate, setInterestRate] = useState('');
+  const [loanYears, setLoanYears] = useState('5');
+  const [customerAmount, setCustomerAmount] = useState<number | null>(null);
+  const [bankAmount, setBankAmount] = useState<number | null>(null);
+  const [emi, setEmi] = useState<number | null>(null);
+
+  useEffect(() => {
+    const cost = parseFloat(projectCost);
+    const down = Math.min(parseFloat(downPayment || '0'), 100);
+
+    if (!isNaN(cost) && !isNaN(down)) {
+      const customerAmt = (down / 100) * cost;
+      const bankAmt = cost - customerAmt;
+      setCustomerAmount(customerAmt);
+      setBankAmount(bankAmt);
+
+      const rate = parseFloat(interestRate || '0') / 100 / 12;
+      const months = parseInt(loanYears || '5') * 12;
+
+      if (rate > 0 && months > 0) {
+        const emiValue = (bankAmt * rate * Math.pow(1 + rate, months)) / (Math.pow(1 + rate, months) - 1);
+        setEmi(emiValue);
+      } else {
+        setEmi(null);
+      }
+    }
+  }, [projectCost, downPayment, interestRate, loanYears]);
+
+  //solar
 
   const [kiloWatt, setKiloWatt] = useState('');
   const [rate, setRate] = useState('');
@@ -127,7 +160,7 @@ const App = () => {
   };
 
   return (
-    <View>
+    <View style={{flex:1, backgroundColor: '#f5f5f5'}}>
       <View style={styles.tabContainer}>
         <Pressable style={[{flex:1, paddingVertical: hp(1)}, tab === 'Solar' && styles.selectedTab]} onPress={() => setTab('Solar')}>
           <Text style={{fontSize: wp(5), color:'black',fontWeight:'bold', textAlign:'center'}}>Solar</Text>
@@ -237,6 +270,48 @@ const App = () => {
 
         {tab === 'Bank' && <View style={styles.container}>
             <Text style={styles.title}>EMI Cost Calculator</Text>
+            <TextInput
+              value={projectCost}
+              onChangeText={setProjectCost}
+              keyboardType="numeric"
+              placeholder="Enter project cost"
+              style={styles.input}
+            />
+
+            <Text style={{ fontSize: wp(4.5), fontWeight: 'bold', marginTop: hp(2), marginBottom: hp(1) }}>Down Payment (%)</Text>
+            <TextInput
+              value={downPayment}
+              onChangeText={(val) => {
+                setDownPayment(val);
+              }}
+              keyboardType="numeric"
+              placeholder="Enter down payment percentage"
+              style={styles.input}
+            />
+
+            <Text style={{ fontSize: wp(4.5), fontWeight: 'bold', marginTop: hp(2), marginBottom: hp(1) }}>Interest Rate (%)</Text>
+            <TextInput
+              value={interestRate}
+              onChangeText={setInterestRate}
+              keyboardType="numeric"
+              placeholder="Enter annual interest rate"
+              style={styles.input}
+            />
+
+            <Text style={{ fontSize: wp(4.5), fontWeight: 'bold', marginTop: hp(2), marginBottom: hp(1) }}>Loan Duration (Years)</Text>
+            <TextInput
+              value={loanYears}
+              onChangeText={setLoanYears}
+              keyboardType="numeric"
+              placeholder="Enter loan duration"
+              style={styles.input}
+            />
+
+            <View style={{ marginTop: hp(3) }}>
+              <Text style={styles.resultText}>Customer Amount: ₹{customerAmount?.toFixed(2)}</Text>
+              <Text style={styles.resultText}>Bank Amount: ₹{bankAmount?.toFixed(2)}</Text>
+              <Text style={styles.resultText}>Monthly EMI: ₹{emi?.toFixed(2)}</Text>
+            </View>
           </View>}
       </ScrollView>
     </View> 
@@ -334,6 +409,12 @@ const styles = StyleSheet.create({
     alignItems:'center',
     width: '100%',
     marginVertical: hp(0.5),
+  },
+
+  resultText: {
+    fontSize: wp(4.5),
+    fontWeight: '500',
+    marginBottom: hp(1),
   },
 });
 
