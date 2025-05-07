@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Keyboard, Pressable } from 'react-native';
 import { hp, wp } from './utils';
+import RNHTMLtoPDF from 'react-native-html-to-pdf';
+import Share from 'react-native-share';
+import RNFS from 'react-native-fs';
 
 const App = () => {
   //tab states
@@ -159,6 +162,47 @@ const App = () => {
     return '₹' + amount.toLocaleString('en-IN', {maximumFractionDigits: 0});
   };
 
+  const handleSharePDF = async () => {
+    const htmlContent = `
+      <h1>Solar Cost Calculator Result</h1>
+      <p><strong>Basic:</strong> ${formatINR(result)}</p>
+      <p><strong>GST (13.8%):</strong> ${formatINR(gstAmount)}</p>
+      <p><strong>Total Cost:</strong> ${formatINR(result + gstAmount)}</p>
+      <p><strong>Total Cost with Land:</strong> ${formatINR(result + gstAmount + Number(land))}</p>
+      <p><strong>Generation/month:</strong> ${formatINR(generationPerMonth)}</p>
+      <p><strong>Generation/year:</strong> ${formatINR(generationPerYear)}</p>
+      <p><strong>Depreciation (40%):</strong> ${formatINR(depreciationAmount)}</p>
+      <p><strong>First Year Return:</strong> ${formatINR(firstYearReturn)}</p>
+      <p><strong>Second Year Return:</strong> ${formatINR(secondYearReturn)}</p>
+      <p><strong>First + Second Year Total:</strong> ${formatINR((firstYearReturn ?? 0) + (secondYearReturn ?? 0))}</p>
+      <p><strong>Third Year Return:</strong> ${formatINR(thirdYearReturn)}</p>
+      <p><strong>Forth Year Return:</strong> ${formatINR(fourthYearReturn)}</p>
+      <p><strong>Fifth Year Return:</strong> ${formatINR(fifthYearReturn)}</p>
+      <p><strong>Total upto 5 years:</strong> ${formatINR(totalUptoFiveYear)}</p>
+      <p><strong>6th - 30th Year Return:</strong> ${formatINR((generationPerYear ?? 0) * 25)}</p>
+      <p><strong>Total Earning upto 30 years:</strong> ${formatINR(totalUptoThirtYear)}</p>
+      <p><strong>Land Appreciation (30 years):</strong> ${formatINR(((Number(land)) ?? 0) * 16)}</p>
+      <p><strong>Total Project Return:</strong> ${formatINR(totalUptoThirtYear + Number(land) - result)}</p>
+    `;
+  
+    try {
+      const options = {
+        html: htmlContent,
+        fileName: 'solar_cost_result',
+        directory: 'Documents',
+      };
+  
+      const file = await RNHTMLtoPDF.convert(options);
+      
+      await Share.open({
+        url: `file://${file.filePath}`,
+        type: 'application/pdf',
+      });
+    } catch (error) {
+      console.error('PDF Share Error:', error);
+    }
+  };
+
   return (
     <View style={{flex:1, backgroundColor: '#f5f5f5'}}>
       <View style={styles.tabContainer}>
@@ -210,6 +254,7 @@ const App = () => {
           </TouchableOpacity>
 
           {result !== null && (
+            <>
             <View style={styles.resultBox}>
               <Text style={styles.resultLabel}>Basic:</Text>
               <Text style={styles.resultValue}>{formatINR(result)}</Text>
@@ -265,6 +310,12 @@ const App = () => {
               <Text style={styles.resultLabel}>Total Project Return</Text>
               <Text style={styles.resultValue}>{formatINR(totalUptoThirtYear + Number(land) - result)}</Text>
             </View>
+
+            <TouchableOpacity style={styles.button} onPress={handleSharePDF}>
+              <Text style={styles.buttonText}>Share as PDF</Text>
+            </TouchableOpacity>
+
+            </>
           )}
         </View>}
 
