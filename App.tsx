@@ -52,13 +52,13 @@ const App = () => {
   const [generationPerYear, setGenerationPerYear] = useState<number | null>(null);
   const [depreciationAmount, setDepreciationAmount] = useState<number | null>(null);
   const [firstYearReturn, setFirstYearReturn] = useState<number | null>(null);
-  const [secondYearReturn, setSecondYearReturn]  = useState<number | null>(null);
+  const [secondYearReturn, setSecondYearReturn] = useState<number | null>(null);
   const [thirdYearReturn, setThirdYearReturn] = useState<number | null>(null);
   const [fourthYearReturn, setFourthYearReturn] = useState<number | null>(null);
   const [fifthYearReturn, setFifthYearReturn] = useState<number | null>(null);
   const [totalUptoFiveYear, setTotalUptoFiveYear] = useState<number | null>(null);
   const [totalUptoThirtYear, setTotalUptoThirtyYear] = useState<number | null>(null);
-  console.log({totalUptoThirtYear, land, result})
+  console.log({ totalUptoThirtYear, land, result })
 
 
   const gst = 13.8
@@ -112,7 +112,7 @@ const App = () => {
       return;
     }
     // const total = (kw * r) + l;
-    const total = (kw * r) ;
+    const total = (kw * r);
     const gstVal = (gst / 100) * total;
     const genMonth = generationConstant * kw;
     const genYear = genMonth * 12;
@@ -129,7 +129,7 @@ const App = () => {
     const fourthYear = genYear + fourthYearDep;
     const fifthYear = genYear;
 
-    console.log({firstYear, secondYear, gst, genYear, depVal})
+    console.log({ firstYear, secondYear, gst, genYear, depVal })
 
     setResult(total);
     setGstAmount(gstVal);
@@ -159,41 +159,106 @@ const App = () => {
 
   const formatINR = (amount: number | undefined | null): string => {
     if (amount === undefined || amount === null) return '₹0';
-    return '₹' + amount.toLocaleString('en-IN', {maximumFractionDigits: 0});
+    return '₹' + amount.toLocaleString('en-IN', { maximumFractionDigits: 0 });
   };
 
   const handleSharePDF = async () => {
     const htmlContent = `
-      <h1>Solar Cost Calculator Result</h1>
-      <p><strong>Basic:</strong> ${formatINR(result)}</p>
-      <p><strong>GST (13.8%):</strong> ${formatINR(gstAmount)}</p>
-      <p><strong>Total Cost:</strong> ${formatINR(result + gstAmount)}</p>
-      <p><strong>Total Cost with Land:</strong> ${formatINR(result + gstAmount + Number(land))}</p>
-      <p><strong>Generation/month:</strong> ${formatINR(generationPerMonth)}</p>
-      <p><strong>Generation/year:</strong> ${formatINR(generationPerYear)}</p>
-      <p><strong>Depreciation (40%):</strong> ${formatINR(depreciationAmount)}</p>
-      <p><strong>First Year Return:</strong> ${formatINR(firstYearReturn)}</p>
-      <p><strong>Second Year Return:</strong> ${formatINR(secondYearReturn)}</p>
-      <p><strong>First + Second Year Total:</strong> ${formatINR((firstYearReturn ?? 0) + (secondYearReturn ?? 0))}</p>
-      <p><strong>Third Year Return:</strong> ${formatINR(thirdYearReturn)}</p>
-      <p><strong>Forth Year Return:</strong> ${formatINR(fourthYearReturn)}</p>
-      <p><strong>Fifth Year Return:</strong> ${formatINR(fifthYearReturn)}</p>
-      <p><strong>Total upto 5 years:</strong> ${formatINR(totalUptoFiveYear)}</p>
-      <p><strong>6th - 30th Year Return:</strong> ${formatINR((generationPerYear ?? 0) * 25)}</p>
-      <p><strong>Total Earning upto 30 years:</strong> ${formatINR(totalUptoThirtYear)}</p>
-      <p><strong>Land Appreciation (30 years):</strong> ${formatINR(((Number(land)) ?? 0) * 16)}</p>
-      <p><strong>Total Project Return:</strong> ${formatINR(totalUptoThirtYear + Number(land) - result)}</p>
-    `;
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>Solar Cost Result</title>
+        <style>
+          body {
+            font-family: 'Helvetica Neue', sans-serif;
+            background: #f2f2f2;
+            padding: 40px 20px;
+          }
   
+          .container {
+            max-width: 600px;
+            background: #fff;
+            margin: auto;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+          }
+  
+          h1 {
+            text-align: center;
+            font-size: 20px;
+            margin-bottom: 24px;
+          }
+  
+          table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+
+          tr:nth-child(odd) td {
+            background-color: #f7f7f7;
+          }
+
+          tr:nth-child(even) td {
+            background-color: #ffffff;
+          }
+
+          td {
+            padding: 10px 14px;
+            font-size: 14px;
+            border-radius: 6px;
+            color: #333;
+          }
+
+          .label {
+            text-align: left;
+            font-weight: 600;
+          }
+
+          .value {
+            text-align: right;
+            font-weight: 500;
+          }
+
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>Solar Cost Calculator Result</h1>
+          <table>
+            <tr><td class="label">Basic:</td>                     <td class="value">${formatINR(result)}</td></tr>
+            <tr><td class="label">GST (13.8%):</td>               <td class="value">${formatINR(gstAmount)}</td></tr>
+            <tr><td class="label">Total Cost:</td>               <td class="value">${formatINR(result + gstAmount)}</td></tr>
+            <tr><td class="label">Total Cost with Land:</td>     <td class="value">${formatINR(result + gstAmount + Number(land))}</td></tr>
+            <tr><td class="label">Generation / month:</td>       <td class="value">${formatINR(generationPerMonth)}</td></tr>
+            <tr><td class="label">Generation / year:</td>        <td class="value">${formatINR(generationPerYear)}</td></tr>
+            <tr><td class="label">Depreciation (40%):</td>        <td class="value">${formatINR(depreciationAmount)}</td></tr>
+            <tr><td class="label">1st Year Return:</td>          <td class="value">${formatINR(firstYearReturn)}</td></tr>
+            <tr><td class="label">2nd Year Return:</td>          <td class="value">${formatINR(secondYearReturn)}</td></tr>
+            <tr><td class="label">1st + 2nd Year Total:</td>      <td class="value">${formatINR((firstYearReturn || 0) + (secondYearReturn || 0))}</td></tr>
+            <tr><td class="label">3rd Year Return:</td>          <td class="value">${formatINR(thirdYearReturn)}</td></tr>
+            <tr><td class="label">4th Year Return:</td>          <td class="value">${formatINR(fourthYearReturn)}</td></tr>
+            <tr><td class="label">5th Year Return:</td>          <td class="value">${formatINR(fifthYearReturn)}</td></tr>
+            <tr><td class="label">Total up to 5 years:</td>      <td class="value">${formatINR(totalUptoFiveYear)}</td></tr>
+            <tr><td class="label">6th–30th Year Return:</td>     <td class="value">${formatINR((generationPerYear || 0) * 25)}</td></tr>
+            <tr><td class="label">Total up to 30 years:</td>     <td class="value">${formatINR(totalUptoThirtYear)}</td></tr>
+            <tr><td class="label">Land Appreciation (30 yrs):</td><td class="value">${formatINR((Number(land) || 0) * 16)}</td></tr>
+            <tr><td class="label">Total Project Return:</td>     <td class="value">${formatINR(totalUptoThirtYear + Number(land) - result)}</td></tr>
+          </table>
+        </div>
+      </body>
+    </html>
+  `;
     try {
       const options = {
         html: htmlContent,
         fileName: 'solar_cost_result',
         directory: 'Documents',
       };
-  
+
       const file = await RNHTMLtoPDF.convert(options);
-      
+
       await Share.open({
         url: `file://${file.filePath}`,
         type: 'application/pdf',
@@ -204,19 +269,19 @@ const App = () => {
   };
 
   return (
-    <View style={{flex:1, backgroundColor: '#f5f5f5'}}>
+    <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
       <View style={styles.tabContainer}>
-        <Pressable style={[{flex:1, paddingVertical: hp(1)}, tab === 'Solar' && styles.selectedTab]} onPress={() => setTab('Solar')}>
-          <Text style={{fontSize: wp(5), color:'black',fontWeight:'bold', textAlign:'center'}}>Solar</Text>
+        <Pressable style={[{ flex: 1, paddingVertical: hp(1) }, tab === 'Solar' && styles.selectedTab]} onPress={() => setTab('Solar')}>
+          <Text style={{ fontSize: wp(5), color: 'black', fontWeight: 'bold', textAlign: 'center' }}>Solar</Text>
         </Pressable>
 
-        <Pressable style={[{flex:1, paddingVertical: hp(1)}, tab === 'Bank' && styles.selectedTab]} onPress={() => setTab('Bank')}>
-          <Text style={{fontSize: wp(5), color:'black',fontWeight:'bold', textAlign:'center' }}>EMI</Text>
+        <Pressable style={[{ flex: 1, paddingVertical: hp(1) }, tab === 'Bank' && styles.selectedTab]} onPress={() => setTab('Bank')}>
+          <Text style={{ fontSize: wp(5), color: 'black', fontWeight: 'bold', textAlign: 'center' }}>EMI</Text>
         </Pressable>
       </View>
 
       <ScrollView keyboardShouldPersistTaps="always" contentContainerStyle={styles.scrollContainer}>
-        {tab==='Solar' && <View style={styles.container}>
+        {tab === 'Solar' && <View style={styles.container}>
           <Text style={styles.title}>Solar Cost Calculator</Text>
 
           <Text style={styles.label}>KiloWatt</Text>
@@ -255,117 +320,117 @@ const App = () => {
 
           {result !== null && (
             <>
-            <View style={styles.resultBox}>
-              <Text style={styles.resultLabel}>Basic:</Text>
-              <Text style={styles.resultValue}>{formatINR(result)}</Text>
+              <View style={styles.resultBox}>
+                <Text style={styles.resultLabel}>Basic:</Text>
+                <Text style={styles.resultValue}>{formatINR(result)}</Text>
 
-              <Text style={styles.resultLabel}>GST (13.8%):</Text>
-              <Text style={styles.resultValue}>{formatINR(gstAmount)}</Text>
+                <Text style={styles.resultLabel}>GST (13.8%):</Text>
+                <Text style={styles.resultValue}>{formatINR(gstAmount)}</Text>
 
-              <Text style={styles.resultLabel}>Total Cost:</Text>
-              <Text style={styles.resultValue}>{formatINR(result + gstAmount)}</Text>
+                <Text style={styles.resultLabel}>Total Cost:</Text>
+                <Text style={styles.resultValue}>{formatINR(result + gstAmount)}</Text>
 
-              <Text style={styles.resultLabel}>Total Cost with Land:</Text>
-              <Text style={styles.resultValue}>{formatINR(result + gstAmount + Number(land))}</Text>
+                <Text style={styles.resultLabel}>Total Cost with Land:</Text>
+                <Text style={styles.resultValue}>{formatINR(result + gstAmount + Number(land))}</Text>
 
-              <Text style={styles.resultLabel}>Generation/month:</Text>
-              <Text style={styles.resultValue}>{formatINR(generationPerMonth)}</Text>
+                <Text style={styles.resultLabel}>Generation/month:</Text>
+                <Text style={styles.resultValue}>{formatINR(generationPerMonth)}</Text>
 
-              <Text style={styles.resultLabel}>Generation/year:</Text>
-              <Text style={styles.resultValue}>{formatINR(generationPerYear)}</Text>
+                <Text style={styles.resultLabel}>Generation/year:</Text>
+                <Text style={styles.resultValue}>{formatINR(generationPerYear)}</Text>
 
-              <Text style={styles.resultLabel}>Depreciation (40%):</Text>
-              <Text style={styles.resultValue}>{formatINR(depreciationAmount)}</Text>
+                <Text style={styles.resultLabel}>Depreciation (40%):</Text>
+                <Text style={styles.resultValue}>{formatINR(depreciationAmount)}</Text>
 
-              <Text style={styles.resultLabel}>First Year Return:</Text>
-              <Text style={styles.resultValue}>{formatINR(firstYearReturn)}</Text>
+                <Text style={styles.resultLabel}>First Year Return:</Text>
+                <Text style={styles.resultValue}>{formatINR(firstYearReturn)}</Text>
 
-              <Text style={styles.resultLabel}>Second Year Return:</Text>
-              <Text style={styles.resultValue}>{formatINR(secondYearReturn)}</Text>
+                <Text style={styles.resultLabel}>Second Year Return:</Text>
+                <Text style={styles.resultValue}>{formatINR(secondYearReturn)}</Text>
 
-              <Text style={styles.resultLabel}>First Year + Second Year Total:</Text>
-              <Text style={styles.resultValue}>{formatINR((firstYearReturn ?? 0) + (secondYearReturn ?? 0))}</Text>
+                <Text style={styles.resultLabel}>First Year + Second Year Total:</Text>
+                <Text style={styles.resultValue}>{formatINR((firstYearReturn ?? 0) + (secondYearReturn ?? 0))}</Text>
 
-              <Text style={styles.resultLabel}>Third Year Return:</Text>
-              <Text style={styles.resultValue}>{formatINR(thirdYearReturn)}</Text>
+                <Text style={styles.resultLabel}>Third Year Return:</Text>
+                <Text style={styles.resultValue}>{formatINR(thirdYearReturn)}</Text>
 
-              <Text style={styles.resultLabel}>Forth Year Return:</Text>
-              <Text style={styles.resultValue}>{formatINR(fourthYearReturn)}</Text>
+                <Text style={styles.resultLabel}>Forth Year Return:</Text>
+                <Text style={styles.resultValue}>{formatINR(fourthYearReturn)}</Text>
 
-              <Text style={styles.resultLabel}>Fifth Year Return:</Text>
-              <Text style={styles.resultValue}>{formatINR(fifthYearReturn)}</Text>
+                <Text style={styles.resultLabel}>Fifth Year Return:</Text>
+                <Text style={styles.resultValue}>{formatINR(fifthYearReturn)}</Text>
 
-              <Text style={styles.resultLabel}>Total Upto 5 year:</Text>
-              <Text style={styles.resultValue}>{formatINR(totalUptoFiveYear)}</Text>
+                <Text style={styles.resultLabel}>Total Upto 5 year:</Text>
+                <Text style={styles.resultValue}>{formatINR(totalUptoFiveYear)}</Text>
 
-              <Text style={styles.resultLabel}>Sixth Year - Thirty Year Return:</Text>
-              <Text style={styles.resultValue}>{formatINR((generationPerYear ?? 0) * 25)}</Text>
+                <Text style={styles.resultLabel}>Sixth Year - Thirty Year Return:</Text>
+                <Text style={styles.resultValue}>{formatINR((generationPerYear ?? 0) * 25)}</Text>
 
-              <Text style={styles.resultLabel}>Total Earning upto 30 years:</Text>
-              <Text style={styles.resultValue}>{formatINR(totalUptoThirtYear)}</Text>
+                <Text style={styles.resultLabel}>Total Earning upto 30 years:</Text>
+                <Text style={styles.resultValue}>{formatINR(totalUptoThirtYear)}</Text>
 
-              <Text style={styles.resultLabel}>Land Appreciation doubles in 7.5 years (30 years): </Text>
-              <Text style={styles.resultValue}>{formatINR(((Number(land)) ?? 0) * 16)}</Text>
+                <Text style={styles.resultLabel}>Land Appreciation doubles in 7.5 years (30 years): </Text>
+                <Text style={styles.resultValue}>{formatINR(((Number(land)) ?? 0) * 16)}</Text>
 
-              <Text style={styles.resultLabel}>Total Project Return</Text>
-              <Text style={styles.resultValue}>{formatINR(totalUptoThirtYear + Number(land) - result)}</Text>
-            </View>
+                <Text style={styles.resultLabel}>Total Project Return</Text>
+                <Text style={styles.resultValue}>{formatINR(totalUptoThirtYear + Number(land) - result)}</Text>
+              </View>
 
-            <TouchableOpacity style={styles.button} onPress={handleSharePDF}>
-              <Text style={styles.buttonText}>Share as PDF</Text>
-            </TouchableOpacity>
+              <TouchableOpacity style={styles.button} onPress={handleSharePDF}>
+                <Text style={styles.buttonText}>Share as PDF</Text>
+              </TouchableOpacity>
 
             </>
           )}
         </View>}
 
         {tab === 'Bank' && <View style={styles.container}>
-            <Text style={styles.title}>EMI Cost Calculator</Text>
-            <TextInput
-              value={projectCost}
-              onChangeText={setProjectCost}
-              keyboardType="numeric"
-              placeholder="Enter project cost"
-              style={styles.input}
-            />
+          <Text style={styles.title}>EMI Cost Calculator</Text>
+          <TextInput
+            value={projectCost}
+            onChangeText={setProjectCost}
+            keyboardType="numeric"
+            placeholder="Enter project cost"
+            style={styles.input}
+          />
 
-            <Text style={{ fontSize: wp(4.5), fontWeight: 'bold', marginTop: hp(2), marginBottom: hp(1) }}>Down Payment (%)</Text>
-            <TextInput
-              value={downPayment}
-              onChangeText={(val) => {
-                setDownPayment(val);
-              }}
-              keyboardType="numeric"
-              placeholder="Enter down payment percentage"
-              style={styles.input}
-            />
+          <Text style={{ fontSize: wp(4.5), fontWeight: 'bold', marginTop: hp(2), marginBottom: hp(1) }}>Down Payment (%)</Text>
+          <TextInput
+            value={downPayment}
+            onChangeText={(val) => {
+              setDownPayment(val);
+            }}
+            keyboardType="numeric"
+            placeholder="Enter down payment percentage"
+            style={styles.input}
+          />
 
-            <Text style={{ fontSize: wp(4.5), fontWeight: 'bold', marginTop: hp(2), marginBottom: hp(1) }}>Interest Rate (%)</Text>
-            <TextInput
-              value={interestRate}
-              onChangeText={setInterestRate}
-              keyboardType="numeric"
-              placeholder="Enter annual interest rate"
-              style={styles.input}
-            />
+          <Text style={{ fontSize: wp(4.5), fontWeight: 'bold', marginTop: hp(2), marginBottom: hp(1) }}>Interest Rate (%)</Text>
+          <TextInput
+            value={interestRate}
+            onChangeText={setInterestRate}
+            keyboardType="numeric"
+            placeholder="Enter annual interest rate"
+            style={styles.input}
+          />
 
-            <Text style={{ fontSize: wp(4.5), fontWeight: 'bold', marginTop: hp(2), marginBottom: hp(1) }}>Loan Duration (Years)</Text>
-            <TextInput
-              value={loanYears}
-              onChangeText={setLoanYears}
-              keyboardType="numeric"
-              placeholder="Enter loan duration"
-              style={styles.input}
-            />
+          <Text style={{ fontSize: wp(4.5), fontWeight: 'bold', marginTop: hp(2), marginBottom: hp(1) }}>Loan Duration (Years)</Text>
+          <TextInput
+            value={loanYears}
+            onChangeText={setLoanYears}
+            keyboardType="numeric"
+            placeholder="Enter loan duration"
+            style={styles.input}
+          />
 
-            <View style={{ marginTop: hp(3) }}>
-              <Text style={styles.resultText}>Customer Amount: ₹{customerAmount?.toFixed(2)}</Text>
-              <Text style={styles.resultText}>Bank Amount: ₹{bankAmount?.toFixed(2)}</Text>
-              <Text style={styles.resultText}>Monthly EMI: ₹{emi?.toFixed(2)}</Text>
-            </View>
-          </View>}
+          <View style={{ marginTop: hp(3) }}>
+            <Text style={styles.resultText}>Customer Amount: ₹{customerAmount?.toFixed(2)}</Text>
+            <Text style={styles.resultText}>Bank Amount: ₹{bankAmount?.toFixed(2)}</Text>
+            <Text style={styles.resultText}>Monthly EMI: ₹{emi?.toFixed(2)}</Text>
+          </View>
+        </View>}
       </ScrollView>
-    </View> 
+    </View>
   );
 };
 const styles = StyleSheet.create({
@@ -376,11 +441,11 @@ const styles = StyleSheet.create({
   tabContainer: {
     backgroundColor: '#f5f5f5',
     paddingTop: hp(5),
-    flexDirection:'row',
-    justifyContent:'space-around'
+    flexDirection: 'row',
+    justifyContent: 'space-around'
   },
   selectedTab: {
-    backgroundColor:'#007AFF'    
+    backgroundColor: '#007AFF'
   },
   container: {
     flexGrow: 1,
@@ -457,7 +522,7 @@ const styles = StyleSheet.create({
   resultRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems:'center',
+    alignItems: 'center',
     width: '100%',
     marginVertical: hp(0.5),
   },
