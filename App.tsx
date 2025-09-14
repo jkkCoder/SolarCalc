@@ -44,9 +44,10 @@ const App = () => {
 
   const [kiloWatt, setKiloWatt] = useState('');
   const [rate, setRate] = useState('');
+  const [evRatePerUnit, setEvRatePerUnit] = useState('')
   const [land, setLand] = useState('');
   const [result, setResult] = useState<number | null>(null);
-  const [errors, setErrors] = useState({ kiloWatt: '', rate: '', land: '' });
+  const [errors, setErrors] = useState({ kiloWatt: '', rate: '', land: '', evRatePerUnit: '' });
   const [gstAmount, setGstAmount] = useState<number | null>(null);
   const [generationPerMonth, setGenerationPerMonth] = useState<number | null>(null);
   const [generationPerYear, setGenerationPerYear] = useState<number | null>(null);
@@ -62,7 +63,7 @@ const App = () => {
 
 
   const gst = 13.8
-  const generationConstant = 4.5 * 30 * 8.5
+  // const generationConstant = 4.5 * 30 * 8.5
   const depriciationConstant = 0.4
 
   const validateDecimal = (value: string): boolean => {
@@ -74,12 +75,14 @@ const App = () => {
     Keyboard.dismiss()
     const kw = parseFloat(kiloWatt);
     const r = parseFloat(rate);
+    const evRate = parseFloat(evRatePerUnit)
     const l = parseFloat(land || '0');
 
     const newErrors = {
       kiloWatt: '',
       rate: '',
       land: '',
+      evRatePerUnit: '',
     };
 
     if (!kiloWatt || isNaN(kw)) {
@@ -90,9 +93,16 @@ const App = () => {
       newErrors.rate = 'Please enter a valid rate';
     }
 
+    if (!evRatePerUnit || isNaN(evRate)) {
+      newErrors.evRatePerUnit = 'Please enter a valid EV Rate.'
+    }
+
     if (land && isNaN(l)) {
       newErrors.land = 'Please enter a valid land value';
     }
+
+    const generationConstant = 4.5 * 30 * evRate
+
 
     setErrors(newErrors);
 
@@ -149,7 +159,7 @@ const App = () => {
   const handleChange = (
     value: string,
     setter: (v: string) => void,
-    field: 'kiloWatt' | 'rate' | 'land'
+    field: 'kiloWatt' | 'rate' | 'land' | 'evRatePerUnit'
   ) => {
     if (value === '' || validateDecimal(value)) {
       setter(value);
@@ -161,6 +171,101 @@ const App = () => {
     if (amount === undefined || amount === null) return '₹0';
     return '₹' + amount.toLocaleString('en-IN', { maximumFractionDigits: 0 });
   };
+
+  const handleEmiSharePdf = async () => {
+    const htmlContent = `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>Solar Cost Result</title>
+        <style>
+          body {
+            font-family: 'Helvetica Neue', sans-serif;
+            background: #f2f2f2;
+            padding: 40px 20px;
+          }
+  
+          .container {
+            max-width: 600px;
+            background: #fff;
+            margin: auto;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+          }
+  
+          h1 {
+            text-align: center;
+            font-size: 20px;
+            margin-bottom: 24px;
+          }
+  
+          table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+
+          tr:nth-child(odd) td {
+            background-color: #f7f7f7;
+          }
+
+          tr:nth-child(even) td {
+            background-color: #ffffff;
+          }
+
+          td {
+            padding: 10px 14px;
+            font-size: 14px;
+            border-radius: 6px;
+            color: #333;
+          }
+
+          .label {
+            text-align: left;
+            font-weight: 600;
+          }
+
+          .value {
+            text-align: right;
+            font-weight: 500;
+          }
+
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>Solar Cost Calculator Result</h1>
+          <table>
+            <tr><td class="label">Project Cost:</td>                     <td class="value">${projectCost}</td></tr>
+            <tr><td class="label">Down Payment (%):</td>               <td class="value">${downPayment}</td></tr>
+            <tr><td class="label">Interest Rate:</td>               <td class="value">${interestRate}</td></tr>
+            <tr><td class="label">Loan Duration (Years):</td>     <td class="value">${loanYears}</td></tr>
+            <tr><td class="label">Customer Amount:</td>       <td class="value">${(customerAmount?.toFixed(2))}</td></tr>
+            <tr><td class="label">Bank Amount:</td>        <td class="value">${(bankAmount?.toFixed(2))}</td></tr>
+            <tr><td class="label">Monthly EMI:</td>        <td class="value">${(emi?.toFixed(2))}</td></tr>
+          </table>
+        </div>
+      </body>
+    </html>
+  `;
+    try {
+      const options = {
+        html: htmlContent,
+        fileName: 'emi_data',
+        directory: 'Documents',
+      };
+
+      const file = await RNHTMLtoPDF.convert(options);
+
+      await Share.open({
+        url: `file://${file.filePath}`,
+        type: 'application/pdf',
+      });
+    } catch (error) {
+      console.error('PDF Share Error:', error);
+    }
+  }
 
   const handleSharePDF = async () => {
     const htmlContent = `
@@ -304,6 +409,16 @@ const App = () => {
           />
           {errors.rate ? <Text style={styles.errorText}>{errors.rate}</Text> : null}
 
+          <Text style={styles.label}>EV Rate Per Unit</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="EV Rate Per Unit"
+            value={evRatePerUnit}
+            keyboardType="numeric"
+            onChangeText={(text) => handleChange(text, setEvRatePerUnit, 'evRatePerUnit')}
+          />
+          {errors.evRatePerUnit ? <Text style={styles.errorText}>{errors.evRatePerUnit}</Text> : null}
+
           <Text style={styles.label}>Land (optional)</Text>
           <TextInput
             style={styles.input}
@@ -428,6 +543,10 @@ const App = () => {
             <Text style={styles.resultText}>Bank Amount: ₹{bankAmount?.toFixed(2)}</Text>
             <Text style={styles.resultText}>Monthly EMI: ₹{emi?.toFixed(2)}</Text>
           </View>
+
+          {!!emi && <TouchableOpacity style={styles.button} onPress={handleEmiSharePdf}>
+            <Text style={styles.buttonText}>Share as PDF</Text>
+          </TouchableOpacity>}
         </View>}
       </ScrollView>
     </View>
