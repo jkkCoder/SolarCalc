@@ -62,7 +62,7 @@ const App = () => {
   console.log({ totalUptoThirtYear, land, result })
 
 
-  const gst = 13.8
+  const gst = 5
   // const generationConstant = 4.5 * 30 * 8.5
   const depriciationConstant = 0.4
 
@@ -333,7 +333,7 @@ const App = () => {
           <h1>Solar Cost Calculator Result</h1>
           <table>
             <tr><td class="label">Basic:</td>                     <td class="value">${formatINR(result)}</td></tr>
-            <tr><td class="label">GST (13.8%):</td>               <td class="value">${formatINR(gstAmount)}</td></tr>
+            <tr><td class="label">GST (5%):</td>               <td class="value">${formatINR(gstAmount)}</td></tr>
             <tr><td class="label">Total Cost:</td>               <td class="value">${formatINR(result + gstAmount)}</td></tr>
             <tr><td class="label">Total Cost with Land:</td>     <td class="value">${formatINR(result + gstAmount + Number(land))}</td></tr>
             <tr><td class="label">Generation / month:</td>       <td class="value">${formatINR(generationPerMonth)}</td></tr>
@@ -439,7 +439,7 @@ const App = () => {
                 <Text style={styles.resultLabel}>Basic:</Text>
                 <Text style={styles.resultValue}>{formatINR(result)}</Text>
 
-                <Text style={styles.resultLabel}>GST (13.8%):</Text>
+                <Text style={styles.resultLabel}>GST (5%):</Text>
                 <Text style={styles.resultValue}>{formatINR(gstAmount)}</Text>
 
                 <Text style={styles.resultLabel}>Total Cost:</Text>
