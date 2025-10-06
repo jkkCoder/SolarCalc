@@ -61,6 +61,20 @@ const App = () => {
   const [totalUptoThirtYear, setTotalUptoThirtyYear] = useState<number | null>(null);
   console.log({ totalUptoThirtYear, land, result })
 
+  // EMI Calculator States for Solar Tab
+  const [solarProjectCost, setSolarProjectCost] = useState<number | null>(null);
+  const [solarDownPayment, setSolarDownPayment] = useState('');
+  const [solarInterestRate, setSolarInterestRate] = useState('');
+  const [solarLoanYears, setSolarLoanYears] = useState('5');
+  const [solarCustomerAmount, setSolarCustomerAmount] = useState<number | null>(null);
+  const [solarBankAmount, setSolarBankAmount] = useState<number | null>(null);
+  const [solarEmi, setSolarEmi] = useState<number | null>(null);
+  const [solarOneMonthSpend, setSolarOneMonthSpend] = useState<number | null>(null);
+  const [solarOneYearSpend, setSolarOneYearSpend] = useState<number | null>(null);
+  const [solarFiveYearSpend, setSolarFiveYearSpend] = useState<number | null>(null);
+  const [solarTenYearSpend, setSolarTenYearSpend] = useState<number | null>(null);
+  const [solarThirtyYearSpend, setSolarThirtyYearSpend] = useState<number | null>(null);
+
 
   const gst = 5
   // const generationConstant = 4.5 * 30 * 8.5
@@ -119,6 +133,20 @@ const App = () => {
       setFifthYearReturn(null);
       setTotalUptoFiveYear(null)
       setTotalUptoThirtyYear(null)
+      
+      // Reset EMI states
+      setSolarProjectCost(null);
+      setSolarDownPayment('');
+      setSolarInterestRate('');
+      setSolarLoanYears('5');
+      setSolarCustomerAmount(null);
+      setSolarBankAmount(null);
+      setSolarEmi(null);
+      setSolarOneMonthSpend(null);
+      setSolarOneYearSpend(null);
+      setSolarFiveYearSpend(null);
+      setSolarTenYearSpend(null);
+      setSolarThirtyYearSpend(null);
       return;
     }
     // const total = (kw * r) + l;
@@ -153,6 +181,9 @@ const App = () => {
     setFifthYearReturn(fifthYear);
     setTotalUptoFiveYear(firstYear + secondYear + thirdYear + fourthYear + fifthYear)
     setTotalUptoThirtyYear(firstYear + secondYear + thirdYear + fourthYear + fifthYear + (genYear * 25))
+    
+    // Set the project cost for EMI calculation (total cost with land)
+    setSolarProjectCost(total + gstVal + Number(land || 0));
   };
 
 
@@ -164,6 +195,54 @@ const App = () => {
     if (value === '' || validateDecimal(value)) {
       setter(value);
       setErrors((prev) => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const handleSolarEmiCalculate = () => {
+    Keyboard.dismiss();
+    const cost = solarProjectCost || 0;
+    const down = Math.min(parseFloat(solarDownPayment || '0'), 100);
+
+    if (cost > 0 && !isNaN(down)) {
+      const customerAmt = (down / 100) * cost;
+      const bankAmt = cost - customerAmt;
+      setSolarCustomerAmount(customerAmt);
+      setSolarBankAmount(bankAmt);
+
+      const rate = parseFloat(solarInterestRate || '0') / 100 / 12;
+      const months = parseInt(solarLoanYears || '5') * 12;
+
+      if (rate > 0 && months > 0) {
+        const emiValue = (bankAmt * rate * Math.pow(1 + rate, months)) / (Math.pow(1 + rate, months) - 1);
+        setSolarEmi(emiValue);
+        
+        // Calculate monthly spend (generation per month - monthly EMI)
+        const monthlySpend = (generationPerMonth || 0) - emiValue;
+        setSolarOneMonthSpend(monthlySpend);
+        
+        // Calculate yearly spend (monthly spend * 12)
+        const yearlySpend = monthlySpend * 12;
+        setSolarOneYearSpend(yearlySpend);
+        
+        // Calculate 5 years spend
+        const fiveYearSpend = yearlySpend * 5;
+        setSolarFiveYearSpend(fiveYearSpend);
+        
+        // Calculate 10 years spend
+        const tenYearSpend = yearlySpend * 10;
+        setSolarTenYearSpend(tenYearSpend);
+        
+        // Calculate 30 years spend
+        const thirtyYearSpend = yearlySpend * 30;
+        setSolarThirtyYearSpend(thirtyYearSpend);
+      } else {
+        setSolarEmi(null);
+        setSolarOneMonthSpend(null);
+        setSolarOneYearSpend(null);
+        setSolarFiveYearSpend(null);
+        setSolarTenYearSpend(null);
+        setSolarThirtyYearSpend(null);
+      }
     }
   };
 
@@ -334,8 +413,8 @@ const App = () => {
           <table>
             <tr><td class="label">Basic:</td>                     <td class="value">${formatINR(result)}</td></tr>
             <tr><td class="label">GST (5%):</td>               <td class="value">${formatINR(gstAmount)}</td></tr>
-            <tr><td class="label">Total Cost:</td>               <td class="value">${formatINR(result + gstAmount)}</td></tr>
-            <tr><td class="label">Total Cost with Land:</td>     <td class="value">${formatINR(result + gstAmount + Number(land))}</td></tr>
+            <tr><td class="label">Total Cost:</td>               <td class="value">${formatINR((result || 0) + (gstAmount || 0))}</td></tr>
+            <tr><td class="label">Total Cost with Land:</td>     <td class="value">${formatINR((result || 0) + (gstAmount || 0) + Number(land))}</td></tr>
             <tr><td class="label">Generation / month:</td>       <td class="value">${formatINR(generationPerMonth)}</td></tr>
             <tr><td class="label">Generation / year:</td>        <td class="value">${formatINR(generationPerYear)}</td></tr>
             <tr><td class="label">Depreciation (40%):</td>        <td class="value">${formatINR(depreciationAmount)}</td></tr>
@@ -349,7 +428,7 @@ const App = () => {
             <tr><td class="label">6th–30th Year Return:</td>     <td class="value">${formatINR((generationPerYear || 0) * 25)}</td></tr>
             <tr><td class="label">Total up to 30 years:</td>     <td class="value">${formatINR(totalUptoThirtYear)}</td></tr>
             <tr><td class="label">Land Appreciation (30 yrs):</td><td class="value">${formatINR((Number(land) || 0) * 16)}</td></tr>
-            <tr><td class="label">Total Project Return:</td>     <td class="value">${formatINR(totalUptoThirtYear + Number(land) - result)}</td></tr>
+            <tr><td class="label">Total Project Return:</td>     <td class="value">${formatINR((totalUptoThirtYear || 0) + Number(land) - (result || 0))}</td></tr>
           </table>
         </div>
       </body>
@@ -443,10 +522,10 @@ const App = () => {
                 <Text style={styles.resultValue}>{formatINR(gstAmount)}</Text>
 
                 <Text style={styles.resultLabel}>Total Cost:</Text>
-                <Text style={styles.resultValue}>{formatINR(result + gstAmount)}</Text>
+                <Text style={styles.resultValue}>{formatINR((result || 0) + (gstAmount || 0))}</Text>
 
                 <Text style={styles.resultLabel}>Total Cost with Land:</Text>
-                <Text style={styles.resultValue}>{formatINR(result + gstAmount + Number(land))}</Text>
+                <Text style={styles.resultValue}>{formatINR((result || 0) + (gstAmount || 0) + Number(land))}</Text>
 
                 <Text style={styles.resultLabel}>Generation/month:</Text>
                 <Text style={styles.resultValue}>{formatINR(generationPerMonth)}</Text>
@@ -488,12 +567,88 @@ const App = () => {
                 <Text style={styles.resultValue}>{formatINR(((Number(land)) ?? 0) * 16)}</Text>
 
                 <Text style={styles.resultLabel}>Total Project Return</Text>
-                <Text style={styles.resultValue}>{formatINR(totalUptoThirtYear + Number(land) - result)}</Text>
+                <Text style={styles.resultValue}>{formatINR((totalUptoThirtYear || 0) + Number(land) - (result || 0))}</Text>
               </View>
 
               <TouchableOpacity style={styles.button} onPress={handleSharePDF}>
                 <Text style={styles.buttonText}>Share as PDF</Text>
               </TouchableOpacity>
+
+              {/* EMI Calculator Section */}
+              <View style={styles.emiSection}>
+                <Text style={styles.emiTitle}>EMI Calculator</Text>
+                
+                <Text style={styles.label}>Project Cost (Total Cost with Land)</Text>
+                <TextInput
+                  style={[styles.input, styles.disabledInput]}
+                  value={solarProjectCost ? formatINR(solarProjectCost) : ''}
+                  editable={false}
+                  placeholder="Project Cost"
+                />
+
+                <Text style={styles.label}>Down Payment (%)</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter down payment percentage"
+                  value={solarDownPayment}
+                  keyboardType="numeric"
+                  onChangeText={setSolarDownPayment}
+                />
+
+                <Text style={styles.label}>Interest Rate (%)</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter annual interest rate"
+                  value={solarInterestRate}
+                  keyboardType="numeric"
+                  onChangeText={setSolarInterestRate}
+                />
+
+                <Text style={styles.label}>Loan Duration (Years)</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Enter loan duration"
+                  value={solarLoanYears}
+                  keyboardType="numeric"
+                  onChangeText={setSolarLoanYears}
+                />
+
+                <TouchableOpacity style={styles.button} onPress={handleSolarEmiCalculate}>
+                  <Text style={styles.buttonText}>Calculate EMI</Text>
+                </TouchableOpacity>
+
+                {/* EMI Results */}
+                {solarEmi !== null && (
+                  <View style={styles.resultBox}>
+                    <Text style={styles.resultLabel}>Customer Amount:</Text>
+                    <Text style={styles.resultValue}>{formatINR(solarCustomerAmount)}</Text>
+
+                    <Text style={styles.resultLabel}>Bank Amount:</Text>
+                    <Text style={styles.resultValue}>{formatINR(solarBankAmount)}</Text>
+
+                    <Text style={styles.resultLabel}>Monthly EMI:</Text>
+                    <Text style={styles.resultValue}>{formatINR(solarEmi)}</Text>
+
+                    <Text style={styles.resultLabel}>Generation/Month:</Text>
+                    <Text style={styles.resultValue}>{formatINR(generationPerMonth)}</Text>
+
+                    <Text style={styles.resultLabel}>1 Month Savings:</Text>
+                    <Text style={styles.resultValue}>{formatINR(solarOneMonthSpend)}</Text>
+
+                    <Text style={styles.resultLabel}>1 Year Savings:</Text>
+                    <Text style={styles.resultValue}>{formatINR(solarOneYearSpend)}</Text>
+
+                    <Text style={styles.resultLabel}>5 Years Savings:</Text>
+                    <Text style={styles.resultValue}>{formatINR(solarFiveYearSpend)}</Text>
+
+                    <Text style={styles.resultLabel}>10 Years Savings:</Text>
+                    <Text style={styles.resultValue}>{formatINR(solarTenYearSpend)}</Text>
+
+                    <Text style={styles.resultLabel}>30 Years Savings:</Text>
+                    <Text style={styles.resultValue}>{formatINR(solarThirtyYearSpend)}</Text>
+                  </View>
+                )}
+              </View>
 
             </>
           )}
@@ -650,6 +805,25 @@ const styles = StyleSheet.create({
     fontSize: wp(4.5),
     fontWeight: '500',
     marginBottom: hp(1),
+  },
+  emiSection: {
+    marginTop: hp(3),
+    padding: wp(3),
+    backgroundColor: '#f0f8ff',
+    borderRadius: wp(2),
+    borderWidth: 1,
+    borderColor: '#007AFF',
+  },
+  emiTitle: {
+    fontSize: hp(2.5),
+    fontWeight: 'bold',
+    marginBottom: hp(2),
+    textAlign: 'center',
+    color: '#007AFF',
+  },
+  disabledInput: {
+    backgroundColor: '#e0e0e0',
+    color: '#666',
   },
 });
 
